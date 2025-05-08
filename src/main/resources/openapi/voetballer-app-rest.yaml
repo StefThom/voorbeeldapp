@@ -1,0 +1,112 @@
+openapi: 3.0.4
+info:
+  title: Record Management API
+  version: 1.0.0
+paths:
+  /records:
+    get:
+      operationId: getAllRecords
+      summary: Get all records
+      responses:
+        '200':
+          description: List of records
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Record'
+    post:
+      operationId: createRecord
+      summary: Create a new record
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecordRequest'
+      responses:
+        '201':
+          description: Record created
+  /records/{id}:
+    get:
+      operationId: getRecord
+      summary: Get a record by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: A single record
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Record'
+    put:
+      operationId: updateRecord
+      summary: Update a record by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecordRequest'
+      responses:
+        '200':
+          description: Record updated
+    delete:
+      operationId: deleteRecord
+      summary: Delete a record by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Record deleted
+  /records/{id}/send:
+    post:
+      operationId: sendRecord
+      summary: Send record by ID to message queue
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '202':
+          description: Record sent to queue
+
+components:
+  schemas:
+    Record:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        value:
+          type: string
+    RecordRequest:
+      type: object
+      required:
+        - name
+        - value
+      properties:
+        name:
+          type: string
+        value:
+          type: string
