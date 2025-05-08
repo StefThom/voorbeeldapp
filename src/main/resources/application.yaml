@@ -1,1 +1,25 @@
-spring.application.name=recordapp
+spring:
+  application:
+    name: recordapp
+  datasource:
+    url: jdbc:postgresql://localhost:5432/voetbaldb
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.xml
+
+  activemq:
+    broker-url: tcp://localhost:61616
+    user: admin
+    password: admin
+
+sftp:
+  host: sftp.example.com
+  port: 22
+  user: sftpuser
+  password: sftppassword
+  remote-dir: /upload/voetballers/

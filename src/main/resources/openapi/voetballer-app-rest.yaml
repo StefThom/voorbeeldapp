@@ -1,112 +1,149 @@
-openapi: 3.0.4
+openapi: 3.0.3
 info:
-  title: Record Management API
+  title: Voetballer API
   version: 1.0.0
+  description: API voor het beheren van voetballers en het verzenden ervan naar een ActiveMQ-queue.
+
+servers:
+  - url: http://localhost:8080
+
 paths:
-  /records:
+  /voetballers:
     get:
-      operationId: getAllRecords
-      summary: Get all records
+      operationId: getVoetballers
+      summary: Haal alle voetballers op
       responses:
         '200':
-          description: List of records
+          description: Lijst van voetballers
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Record'
+                  $ref: '#/components/schemas/Voetballer'
+
     post:
-      operationId: createRecord
-      summary: Create a new record
+      operationId: createVoetballer
+      summary: Maak een nieuwe voetballer aan
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RecordRequest'
+              $ref: '#/components/schemas/VoetballerRequest'
       responses:
         '201':
-          description: Record created
-  /records/{id}:
-    get:
-      operationId: getRecord
-      summary: Get a record by ID
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: A single record
+          description: Voetballer aangemaakt
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Record'
-    put:
-      operationId: updateRecord
-      summary: Update a record by ID
+                $ref: '#/components/schemas/Voetballer'
+
+  /voetballers/{id}:
+    get:
+      operationId: getVoetballerById
+      summary: Haal een voetballer op via ID
       parameters:
         - in: path
           name: id
           required: true
           schema:
             type: integer
+            format: int64
+      responses:
+        '200':
+          description: Voetballer gevonden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Voetballer'
+        '404':
+          description: Niet gevonden
+
+    put:
+      operationId: updateVoetballer
+      summary: Wijzig een bestaande voetballer
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RecordRequest'
+              $ref: '#/components/schemas/VoetballerRequest'
       responses:
         '200':
-          description: Record updated
+          description: Voetballer gewijzigd
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Voetballer'
+        '404':
+          description: Niet gevonden
+
     delete:
-      operationId: deleteRecord
-      summary: Delete a record by ID
+      operationId: deleteVoetballer
+      summary: Verwijder een voetballer
       parameters:
         - in: path
           name: id
           required: true
           schema:
             type: integer
+            format: int64
       responses:
         '204':
-          description: Record deleted
-  /records/{id}/send:
+          description: Verwijderd
+        '404':
+          description: Niet gevonden
+
+  /voetballers/{id}/send:
     post:
-      operationId: sendRecord
-      summary: Send record by ID to message queue
+      operationId: sendVoetballer
+      summary: Stuur een voetballer naar de ActiveMQ-queue
       parameters:
         - in: path
           name: id
           required: true
           schema:
             type: integer
+            format: int64
       responses:
         '202':
-          description: Record sent to queue
+          description: Voetballer naar queue gestuurd
+        '404':
+          description: Niet gevonden
 
 components:
   schemas:
-    Record:
+    Voetballer:
       type: object
       properties:
         id:
           type: integer
-        name:
+          format: int64
+          example: 1
+        naam:
           type: string
-        value:
+          example: Lionel Messi
+        positie:
           type: string
-    RecordRequest:
+          example: Aanvaller
+
+    VoetballerRequest:
       type: object
       required:
-        - name
-        - value
+        - naam
+        - positie
       properties:
-        name:
+        naam:
           type: string
-        value:
+          example: Kylian Mbappé
+        positie:
           type: string
+          example: Aanvaller

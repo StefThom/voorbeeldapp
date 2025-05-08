@@ -1,4 +1,4 @@
-package com.example.voorbeeldapp.model.repository;
+package com.example.voorbeeldapp.repository;
 
 import com.example.voorbeeldapp.model.VoetballerEntity;
 import org.springframework.data.repository.CrudRepository;

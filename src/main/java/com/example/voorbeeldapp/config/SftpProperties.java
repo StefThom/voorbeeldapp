@@ -1,10 +1,14 @@
-package com.example.voorbeeldapp.properties;
+package com.example.voorbeeldapp.config;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 @Component
 @ConfigurationProperties(prefix = "sftp")
+@Getter
+@Setter
 public class SftpProperties {
     private String host;
     private int port;

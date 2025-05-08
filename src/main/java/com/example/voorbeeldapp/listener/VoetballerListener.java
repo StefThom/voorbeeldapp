@@ -1,46 +1,83 @@
 package com.example.voorbeeldapp.listener;
 
-import com.example.voorbeeldapp.properties.SftpProperties;
+import com.example.voorbeeldapp.config.SftpProperties;
+import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
+import jakarta.jms.Message;
+import jakarta.jms.TextMessage;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Properties;
 
+@Slf4j
 @Component
-public class RecordListener {
+@RequiredArgsConstructor
+public class VoetballerListener {
 
     private final SftpProperties sftpProperties;
 
-    public RecordListener(SftpProperties sftpProperties) {
-        this.sftpProperties = sftpProperties;
+    @JmsListener(destination = "voetballer.queue")
+    public void receiveMessage(Message message) {
+        try {
+            if (message instanceof TextMessage textMessage) {
+                String content = textMessage.getText();
+                log.info("Ontvangen bericht: {}", content);
+
+                String fileName = "voetballer_" + System.currentTimeMillis() + ".txt";
+                uploadFileToSftp(fileName, content);
+            } else {
+                log.warn("Onbekend berichttype ontvangen");
+            }
+        } catch (Exception e) {
+            log.error("Fout bij verwerken van bericht", e);
+        }
     }
 
-    @JmsListener(destination = "record.queue")
-    public void handleRecord(Record record) throws Exception {
-        String content = String.format("ID: %d\nName: %s\nValue: %s",
-                record.getId(), record.getName(), record.getValue());
+    private void uploadFileToSftp(String fileName, String content) {
+        Session session = null;
+        ChannelSftp channelSftp = null;
+        try {
+            JSch jsch = new JSch();
+            session = jsch.getSession(
+                    sftpProperties.getUser(),
+                    sftpProperties.getHost(),
+                    sftpProperties.getPort()
+            );
+            session.setPassword(sftpProperties.getPassword());
 
-        Path tempFile = Files.createTempFile("record-", ".txt");
-        Files.writeString(tempFile, content);
+            Properties config = new Properties();
+            config.put("StrictHostKeyChecking", "no");
+            session.setConfig(config);
 
-        uploadViaSftp(tempFile);
-        Files.delete(tempFile);
-    }
+            session.connect();
+            log.info("Verbonden met SFTP-server");
 
-    private void uploadViaSftp(Path file) throws Exception {
-        JSch jsch = new JSch();
-        Session session = jsch.getSession(sftpProperties.getUser(), sftpProperties.getHost(), sftpProperties.getPort());
-        session.setPassword(sftpProperties.getPassword());
-        session.setConfig("StrictHostKeyChecking", "no");
-        session.connect();
+            channelSftp = (ChannelSftp) session.openChannel("sftp");
+            channelSftp.connect();
 
-        ChannelSftp sftp = (ChannelSftp) session.openChannel("sftp");
-        sftp.connect();
-        sftp.put(file.toString(), sftpProperties.getRemoteDir() + "/" + file.getFileName());
-        sftp.disconnect();
-        session.disconnect();
+            channelSftp.cd(sftpProperties.getRemoteDir());
+
+            try (InputStream inputStream = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8))) {
+                channelSftp.put(inputStream, fileName);
+                log.info("Bestand {} succesvol geüpload", fileName);
+            }
+
+        } catch (Exception e) {
+            log.error("Fout bij uploaden naar SFTP", e);
+        } finally {
+            if (channelSftp != null && channelSftp.isConnected()) {
+                channelSftp.disconnect();
+            }
+            if (session != null && session.isConnected()) {
+                session.disconnect();
+            }
+        }
     }
 }
