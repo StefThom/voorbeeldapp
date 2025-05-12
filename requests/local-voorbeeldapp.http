@@ -1,0 +1,160 @@
+###
+### Test ik ophalen voetballers met een geldige accept
+###
+GET {{api-url}}//voetballers
+Accept: application/json
+Content-Type: application/json
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
+
+###
+### Test ik het opvoeren van een voetballer zonder alle verplichte velden
+###
+POST {{api-url}}//voetballers
+Accept: application/json
+Content-Type: application/json
+
+{
+  "naam": "Kylian Mbappé"
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 400, "Response status is not 400");
+    });
+
+%}
+
+###
+### Test ik het opvoeren van een voetballer met naam Lionel Messi
+###
+POST {{api-url}}//voetballers
+Accept: application/json
+Content-Type: application/json
+
+{
+  "naam": "Lionel Messi",
+  "positie": "Aanvaller"
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 201, "Response status is not 201");
+        client.global.set("record-id", response.body.id);
+        client.log("Saved record-id.");
+    });
+
+%}
+
+###
+### Test ik het verwijderen van het hierboven opgevoerde en daarna opgehaalde record
+###
+DELETE {{api-url}}//voetballers/{{record-id}}
+Accept: application/json
+Content-Type: application/json
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 204, "Response status is not 204");
+    });
+
+%}
+
+###
+### Test ik het opvoeren van een record
+###
+POST {{api-url}}//voetballers
+Accept: application/json
+Content-Type: application/json
+
+{
+  "naam": "Lionel Messi",
+  "positie": "Aanvaller"
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 201, "Response status is not 201");
+        client.global.set("record-id", response.body.id);
+        client.log("Saved record-id.");
+    });
+
+%}
+
+###
+### Test ik het wijzigen van het hierboven opgevoerde record
+###
+PUT {{api-url}}//voetballers/{{record-id}}
+Accept: application/json
+Content-Type: application/json
+
+{
+  "naam": "Lionel Messi",
+  "positie": "Verdediger"
+}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+        client.assert(response.body.positie === "Verdediger", "Response positie is not Verdediger");
+        client.global.set("positie", response.body.positie);
+        client.log("Saved positie.");
+    });
+
+%}
+
+###
+### Test ik het ophalen van een voetballer met id
+###
+GET {{api-url}}//voetballers/{{record-id}}
+Accept: application/json
+Content-Type: application/json
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+        client.assert(response.body.positie === "Verdediger", "Response positie is not Verdediger");
+        client.global.set("positie", response.body.positie);
+        client.log("Saved positie.");
+    });
+
+%}
+
+
+###
+### Test ik het zenden van een voetballer naar de Queue
+###
+POST {{api-url}}//voetballers/{{record-id}}/send
+Accept: application/json
+Content-Type: application/json
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 202, "Response status is not 202");
+    });
+
+%}
+
+###
+### Test ik het verwijderen van het hierboven opgevoerde en daarna gewijzigde record
+###
+DELETE {{api-url}}//voetballers/{{record-id}}
+Accept: application/json
+Content-Type: application/json
+
+> {%
+    client.test("Request executed successfully", function() {
+        client.assert(response.status === 204, "Response status is not 204");
+    });
+
+%}

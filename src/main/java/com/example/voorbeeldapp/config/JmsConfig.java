@@ -10,6 +10,6 @@ public class JmsConfig {
 
     @Bean
     public Queue voetballerQueue() {
-        return new ActiveMQQueue("voetballer.queue");
+        return new ActiveMQQueue("voetballerQueue");
     }
 }
