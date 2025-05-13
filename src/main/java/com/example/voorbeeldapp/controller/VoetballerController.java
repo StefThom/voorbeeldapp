@@ -28,7 +28,8 @@ public class VoetballerController implements VoetballersApi {
         return new Voetballer()
                 .id(entity.getId())
                 .naam(entity.getNaam())
-                .positie(entity.getPositie());
+                .positie(entity.getPositie())
+                .team(entity.getTeam());
     }
 
     @Override
@@ -45,6 +46,7 @@ public class VoetballerController implements VoetballersApi {
         VoetballerEntity entity = new VoetballerEntity();
         entity.setNaam(voetballerRequest.getNaam());
         entity.setPositie(voetballerRequest.getPositie());
+        entity.setTeam(voetballerRequest.getTeam());
 
         VoetballerEntity saved = repository.save(entity);
         return ResponseEntity.status(201).body(toModel(saved));
@@ -62,6 +64,7 @@ public class VoetballerController implements VoetballersApi {
         return repository.findById(id).map(entity -> {
             entity.setNaam(request.getNaam());
             entity.setPositie(request.getPositie());
+            entity.setTeam(request.getTeam());
             VoetballerEntity updated = repository.save(entity);
             return ResponseEntity.ok(toModel(updated));
         }).orElse(ResponseEntity.notFound().build());
@@ -82,7 +85,7 @@ public class VoetballerController implements VoetballersApi {
         if (opt.isPresent()) {
             VoetballerEntity entity = opt.get();
             // Maak een eenvoudige String van het bericht, bv. JSON of simpel tekstformaat
-            String message = String.format("Voetballer: %s (%s)", entity.getNaam(), entity.getPositie());
+            String message = String.format("Voetballer: %s (%s, %s)", entity.getNaam(), entity.getPositie(), entity.getTeam());
 
             // Stuur naar ActiveMQ
             jmsTemplate.convertAndSend(voetballerQueue, message);

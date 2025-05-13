@@ -38,8 +38,8 @@ class VoetballerControllerTest {
     // ✅ GET all
     @Test
     void testGetAllVoetballers() {
-        VoetballerEntity v1 = new VoetballerEntity(1L, "Van Dijk", "Verdediger");
-        VoetballerEntity v2 = new VoetballerEntity(2L, "Memphis", "Aanvaller");
+        VoetballerEntity v1 = new VoetballerEntity(1L, "Van Dijk", "Verdediger", "SV Hoogeveen");
+        VoetballerEntity v2 = new VoetballerEntity(2L, "Memphis", "Aanvaller", "SV De Weide");
 
         when(mockRepository.findAll()).thenReturn(Arrays.asList(v1, v2));
 
@@ -47,12 +47,13 @@ class VoetballerControllerTest {
 
         assertEquals(2, result.getBody().size());
         assertEquals("Van Dijk", result.getBody().get(0).getNaam());
+        assertEquals("SV De Weide", result.getBody().get(1).getTeam());
     }
 
     // ✅ GET by ID - found
     @Test
     void testGetVoetballerById_found() {
-        VoetballerEntity v = new VoetballerEntity(1L, "Frenkie", "Middenvelder");
+        VoetballerEntity v = new VoetballerEntity(1L, "Frenkie", "Middenvelder", "SV De Weide");
         when(mockRepository.findById(1L)).thenReturn(Optional.of(v));
 
         var result = controller.getVoetballerById(1L);
@@ -73,8 +74,8 @@ class VoetballerControllerTest {
     // ✅ POST create
     @Test
     void testCreateVoetballer() {
-        VoetballerRequest request = new VoetballerRequest().naam("Blind").positie("Verdediger");
-        VoetballerEntity entity = new VoetballerEntity(1L, "Blind", "Verdediger");
+        VoetballerRequest request = new VoetballerRequest().naam("Blind").positie("Verdediger").team("SV De Weide");
+        VoetballerEntity entity = new VoetballerEntity(1L, "Blind", "Verdediger", "SV De Weide");
 
         when(mockRepository.save(any())).thenReturn(entity);
 
@@ -82,13 +83,14 @@ class VoetballerControllerTest {
 
         assertEquals(201, response.getStatusCodeValue());
         assertEquals("Blind", response.getBody().getNaam());
+        assertEquals("SV de Weide", response.getBody().getTeam());
     }
 
     // ✅ PUT update - found
     @Test
     void testUpdateVoetballer_found() {
-        VoetballerEntity existing = new VoetballerEntity(10L, "Oud", "Keeper");
-        VoetballerRequest updatedRequest = new VoetballerRequest().naam("Nieuw").positie("Doelman");
+        VoetballerEntity existing = new VoetballerEntity(10L, "Oud", "Keeper", "SV De Weide");
+        VoetballerRequest updatedRequest = new VoetballerRequest().naam("Nieuw").positie("Doelman").team("SV De Weide");
 
         when(mockRepository.findById(10L)).thenReturn(Optional.of(existing));
         when(mockRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
@@ -103,7 +105,7 @@ class VoetballerControllerTest {
     // ✅ PUT update - not found
     @Test
     void testUpdateVoetballer_notFound() {
-        VoetballerRequest request = new VoetballerRequest().naam("Onbekend").positie("Middenvelder");
+        VoetballerRequest request = new VoetballerRequest().naam("Onbekend").positie("Middenvelder").team("SV De Weide");
 
         when(mockRepository.findById(999L)).thenReturn(Optional.empty());
 
@@ -115,7 +117,7 @@ class VoetballerControllerTest {
     // ✅ DELETE - found
     @Test
     void testDeleteVoetballer_found() {
-        VoetballerEntity entity = new VoetballerEntity(4L, "Sneijder", "Middenvelder");
+        VoetballerEntity entity = new VoetballerEntity(4L, "Sneijder", "Middenvelder", "SV De Weide");
         when(mockRepository.existsById(4L)).thenReturn(true);
         doNothing().when(mockRepository).deleteById(4L);
 
@@ -141,6 +143,7 @@ class VoetballerControllerTest {
         entity.setId(3L);
         entity.setNaam("Memphis Depay");
         entity.setPositie("Aanvaller");
+        entity.setTeam("SV De Weide");
 
         when(mockRepository.findById(3L)).thenReturn(Optional.of(entity));
 
@@ -154,6 +157,7 @@ class VoetballerControllerTest {
         String sentMessage = messageCaptor.getValue();
         assertTrue(sentMessage.contains("Memphis Depay"));
         assertTrue(sentMessage.contains("Aanvaller"));
+        assertTrue(sentMessage.contains("SV De Weide"));
     }
 
     @Test

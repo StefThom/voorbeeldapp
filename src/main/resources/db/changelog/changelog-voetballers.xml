@@ -12,8 +12,11 @@
             </column>
             <column name="naam" type="VARCHAR(255)"/>
             <column name="positie" type="VARCHAR(255)"/>
+            <column name="team" type="VARCHAR(255)"/>
         </createTable>
         <addPrimaryKey tableName="voetballers" columnNames="id"/>
         <addNotNullConstraint tableName="voetballers" columnName="naam"/>
+        <addNotNullConstraint tableName="voetballers" columnName="positie"/>
+        <addNotNullConstraint tableName="voetballers" columnName="team"/>
     </changeSet>
 </databaseChangeLog>

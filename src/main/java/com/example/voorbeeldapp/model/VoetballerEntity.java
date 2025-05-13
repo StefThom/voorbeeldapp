@@ -1,10 +1,7 @@
 package com.example.voorbeeldapp.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
 @Table(name = "voetballers")
@@ -12,13 +9,20 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
+
 public class VoetballerEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, length = 100)
     private String naam;
 
+    @Column(nullable = false)
     private String positie;
+
+    @Column(nullable = false)
+    private String team;
 }

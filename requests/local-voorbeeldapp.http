@@ -38,7 +38,8 @@ Content-Type: application/json
 
 {
   "naam": "Lionel Messi",
-  "positie": "Aanvaller"
+  "positie": "Aanvaller",
+  "team": "SV de Weide"
 }
 
 > {%
@@ -73,7 +74,8 @@ Content-Type: application/json
 
 {
   "naam": "Lionel Messi",
-  "positie": "Aanvaller"
+  "positie": "Aanvaller",
+  "team": "SV de Weide"
 }
 
 > {%
@@ -94,13 +96,15 @@ Content-Type: application/json
 
 {
   "naam": "Lionel Messi",
-  "positie": "Verdediger"
+  "positie": "Verdediger",
+  "team": "SV Hoogeveen"
 }
 
 > {%
     client.test("Request executed successfully", function() {
         client.assert(response.status === 200, "Response status is not 200");
         client.assert(response.body.positie === "Verdediger", "Response positie is not Verdediger");
+        client.assert(response.body.team === "SV Hoogeveen", "Response positie is not SV Hoogeveen");
         client.global.set("positie", response.body.positie);
         client.log("Saved positie.");
     });
@@ -124,6 +128,7 @@ Content-Type: application/json
     client.test("Request executed successfully", function() {
         client.assert(response.status === 200, "Response status is not 200");
         client.assert(response.body.positie === "Verdediger", "Response positie is not Verdediger");
+        client.assert(response.body.team === "SV Hoogeveen", "Response positie is not SV Hoogeveen");
         client.global.set("positie", response.body.positie);
         client.log("Saved positie.");
     });

@@ -130,20 +130,33 @@ components:
           example: 1
         naam:
           type: string
-          example: Lionel Messi
+          maxLength: 100
+          example: Stan de Voetballer
         positie:
           type: string
           example: Aanvaller
-
-    VoetballerRequest:
-      type: object
+        team:
+          type: string
+          example: SV de Weide
       required:
         - naam
         - positie
+        - team
+
+    VoetballerRequest:
+      type: object
       properties:
         naam:
           type: string
-          example: Kylian Mbappé
+          maxLength: 100
+          example: Marco Jansen
         positie:
           type: string
-          example: Aanvaller
+          example: Verdediger
+        team:
+          type: string
+          example: SV de Weide
+      required:
+        - naam
+        - positie
+        - team
