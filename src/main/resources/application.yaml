@@ -18,8 +18,10 @@ spring:
     password: admin
 
 sftp:
-  host: sftp.example.com
-  port: 22
-  user: sftpuser
-  password: sftppassword
-  remote-dir: /upload/voetballers/
+#  host: sftp.example.com
+#  port: 22
+  host: localhost
+  port: 2222
+  user: test
+  password: test
+  remote-dir: /

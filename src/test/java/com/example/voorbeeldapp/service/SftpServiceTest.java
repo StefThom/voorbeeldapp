@@ -1,6 +1,6 @@
 package com.example.voorbeeldapp.service;
 
-import com.example.voorbeeldapp.config.SftpProperties;
+import com.example.voorbeeldapp.config.SftpConfig;
 import com.jcraft.jsch.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,7 +19,7 @@ import static org.mockito.Mockito.*;
 class SftpServiceTest {
 
     @Mock
-    private SftpProperties mockSftpProperties;
+    private SftpConfig mockSftpConfig;
     @Mock
     private JSch mockJsch;
     @Mock
@@ -33,12 +33,12 @@ class SftpServiceTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        when(mockSftpProperties.getHost()).thenReturn("localhost");
-        when(mockSftpProperties.getPort()).thenReturn(22);
-        when(mockSftpProperties.getUser()).thenReturn("sftpuser");
-        when(mockSftpProperties.getPassword()).thenReturn("sftppassword");
+        when(mockSftpConfig.getHost()).thenReturn("localhost");
+        when(mockSftpConfig.getPort()).thenReturn(22);
+        when(mockSftpConfig.getUser()).thenReturn("sftpuser");
+        when(mockSftpConfig.getPassword()).thenReturn("sftppassword");
 
-        sftpServiceUnderTest = new SftpService(mockSftpProperties) {
+        sftpServiceUnderTest = new SftpService(mockSftpConfig) {
             @Override
             protected JSch createJsch() {
                 return mockJsch;
@@ -55,7 +55,7 @@ class SftpServiceTest {
 
     @Test
     void testUploadVoetballerToSftp_success() throws Exception {
-        when(mockSftpProperties.getRemoteDir()).thenReturn("/upload/voetballers/");
+        when(mockSftpConfig.getRemoteDir()).thenReturn("/upload/voetballers/");
         String content = "Voetballer: Bergwijn, Positie: Aanvaller";
 
         sftpServiceUnderTest.uploadVoetballerToSftp(content);
@@ -108,7 +108,7 @@ class SftpServiceTest {
     @Test
     void testChannelCreationFailure() throws Exception {
         when(mockSession.isConnected()).thenReturn(true);
-        sftpServiceUnderTest = new SftpService(mockSftpProperties) {
+        sftpServiceUnderTest = new SftpService(mockSftpConfig) {
             @Override
             protected JSch createJsch() {
                 return mockJsch;

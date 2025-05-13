@@ -1,6 +1,6 @@
 package com.example.voorbeeldapp.service;
 
-import com.example.voorbeeldapp.config.SftpProperties;
+import com.example.voorbeeldapp.config.SftpConfig;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.Session;
@@ -15,7 +15,7 @@ import java.util.Properties;
 @RequiredArgsConstructor
 public class SftpService {
 
-    private final SftpProperties sftpProperties;
+    private final SftpConfig sftpConfig;
 
     public void uploadVoetballerToSftp(String content) {
         Session session = null;
@@ -23,8 +23,8 @@ public class SftpService {
 
         try {
             JSch jsch = createJsch();
-            session = jsch.getSession(sftpProperties.getUser(), sftpProperties.getHost(), sftpProperties.getPort());
-            session.setPassword(sftpProperties.getPassword());
+            session = jsch.getSession(sftpConfig.getUser(), sftpConfig.getHost(), sftpConfig.getPort());
+            session.setPassword(sftpConfig.getPassword());
 
             Properties config = new Properties();
             config.put("StrictHostKeyChecking", "no");
@@ -33,7 +33,7 @@ public class SftpService {
 
             channelSftp = getSftpChannel(session);
             channelSftp.connect();
-            channelSftp.cd(sftpProperties.getRemoteDir());
+            channelSftp.cd(sftpConfig.getRemoteDir());
 
             byte[] data = content.getBytes(StandardCharsets.UTF_8);
             ByteArrayInputStream inputStream = new ByteArrayInputStream(data);
@@ -43,8 +43,12 @@ public class SftpService {
         } catch (Exception e) {
             throw new RuntimeException("SFTP upload failed", e);
         } finally {
-            if (channelSftp != null && channelSftp.isConnected()) channelSftp.disconnect();
-            if (session != null && session.isConnected()) session.disconnect();
+            if (channelSftp != null && channelSftp.isConnected()) {
+                channelSftp.disconnect();
+            }
+            if (session != null && session.isConnected()) {
+                session.disconnect();
+            }
         }
     }
 
