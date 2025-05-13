@@ -10,6 +10,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.jms.core.JmsTemplate;
 
 import java.util.Arrays;
@@ -45,6 +47,7 @@ class VoetballerControllerTest {
 
         var result = controller.getVoetballers();
 
+        assertEquals(HttpStatus.OK, result.getStatusCode());
         assertEquals(2, result.getBody().size());
         assertEquals("Van Dijk", result.getBody().get(0).getNaam());
         assertEquals("SV De Weide", result.getBody().get(1).getTeam());
@@ -53,51 +56,51 @@ class VoetballerControllerTest {
     // ✅ GET by ID - found
     @Test
     void testGetVoetballerById_found() {
-        VoetballerEntity v = new VoetballerEntity(1L, "Frenkie", "Middenvelder", "SV De Weide");
-        when(mockRepository.findById(1L)).thenReturn(Optional.of(v));
+        VoetballerEntity v = new VoetballerEntity(200L, "Frenkie", "Middenvelder", "SV De Weide");
+        when(mockRepository.findById(200L)).thenReturn(Optional.of(v));
 
-        var result = controller.getVoetballerById(1L);
+        var result = controller.getVoetballerById(200L);
 
-        assertEquals(200, result.getStatusCodeValue());
+        assertEquals(HttpStatus.OK, result.getStatusCode());
         assertEquals("Frenkie", result.getBody().getNaam());
     }
 
     // ✅ GET by ID - not found
     @Test
     void testGetVoetballerById_notFound() {
-        when(mockRepository.findById(99L)).thenReturn(Optional.empty());
+        when(mockRepository.findById(404L)).thenReturn(Optional.empty());
 
-        var result = controller.getVoetballerById(99L);
-        assertEquals(404, result.getStatusCodeValue());
+        var result = controller.getVoetballerById(404L);
+        assertEquals(HttpStatus.NOT_FOUND, result.getStatusCode());
     }
 
     // ✅ POST create
     @Test
     void testCreateVoetballer() {
         VoetballerRequest request = new VoetballerRequest().naam("Blind").positie("Verdediger").team("SV De Weide");
-        VoetballerEntity entity = new VoetballerEntity(1L, "Blind", "Verdediger", "SV De Weide");
+        VoetballerEntity entity = new VoetballerEntity(201L, "Blind", "Verdediger", "SV De Weide");
 
         when(mockRepository.save(any())).thenReturn(entity);
 
         var response = controller.createVoetballer(request);
 
-        assertEquals(201, response.getStatusCodeValue());
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals("Blind", response.getBody().getNaam());
-        assertEquals("SV de Weide", response.getBody().getTeam());
+        assertEquals("SV De Weide", response.getBody().getTeam());
     }
 
     // ✅ PUT update - found
     @Test
     void testUpdateVoetballer_found() {
-        VoetballerEntity existing = new VoetballerEntity(10L, "Oud", "Keeper", "SV De Weide");
+        VoetballerEntity existing = new VoetballerEntity(200L, "Oud", "Keeper", "SV De Weide");
         VoetballerRequest updatedRequest = new VoetballerRequest().naam("Nieuw").positie("Doelman").team("SV De Weide");
 
-        when(mockRepository.findById(10L)).thenReturn(Optional.of(existing));
+        when(mockRepository.findById(200L)).thenReturn(Optional.of(existing));
         when(mockRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        var response = controller.updateVoetballer(10L, updatedRequest);
+        var response = controller.updateVoetballer(200L, updatedRequest);
 
-        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals("Nieuw", response.getBody().getNaam());
         assertEquals("Doelman", response.getBody().getPositie());
     }
@@ -107,25 +110,25 @@ class VoetballerControllerTest {
     void testUpdateVoetballer_notFound() {
         VoetballerRequest request = new VoetballerRequest().naam("Onbekend").positie("Middenvelder").team("SV De Weide");
 
-        when(mockRepository.findById(999L)).thenReturn(Optional.empty());
+        when(mockRepository.findById(404L)).thenReturn(Optional.empty());
 
-        var result = controller.updateVoetballer(999L, request);
+        var result = controller.updateVoetballer(404L, request);
 
-        assertEquals(404, result.getStatusCodeValue());
+        assertEquals(HttpStatus.NOT_FOUND, result.getStatusCode());
     }
 
     // ✅ DELETE - found
     @Test
     void testDeleteVoetballer_found() {
-        VoetballerEntity entity = new VoetballerEntity(4L, "Sneijder", "Middenvelder", "SV De Weide");
-        when(mockRepository.existsById(4L)).thenReturn(true);
-        doNothing().when(mockRepository).deleteById(4L);
+        VoetballerEntity entity = new VoetballerEntity(204L, "Sneijder", "Middenvelder", "SV De Weide");
+        when(mockRepository.existsById(204L)).thenReturn(true);
+        doNothing().when(mockRepository).deleteById(204L);
 
-        var result = controller.deleteVoetballer(4L);
+        var result = controller.deleteVoetballer(204L);
 
-        assertEquals(204, result.getStatusCodeValue());
+        assertEquals(HttpStatus.NO_CONTENT, result.getStatusCode());
         verify(mockRepository, never()).delete(entity);
-        verify(mockRepository, times(1)).deleteById(4L);
+        verify(mockRepository, times(1)).deleteById(204L);
     }
 
     // ✅ DELETE - not found
@@ -133,23 +136,23 @@ class VoetballerControllerTest {
     void testDeleteVoetballer_notFound() {
         var result = controller.deleteVoetballer(404L);
 
-        assertEquals(404, result.getStatusCodeValue());
+        assertEquals(HttpStatus.NOT_FOUND, result.getStatusCode());
         verify(mockRepository, never()).delete(any());
     }
 
     @Test
     void testSendVoetballer_Success() {
         VoetballerEntity entity = new VoetballerEntity();
-        entity.setId(3L);
+        entity.setId(200L);
         entity.setNaam("Memphis Depay");
         entity.setPositie("Aanvaller");
         entity.setTeam("SV De Weide");
 
-        when(mockRepository.findById(3L)).thenReturn(Optional.of(entity));
+        when(mockRepository.findById(200L)).thenReturn(Optional.of(entity));
 
-        var response = controller.sendVoetballer(3L);
+        var response = controller.sendVoetballer(200L);
 
-        assertEquals(202, response.getStatusCodeValue());
+        assertEquals(HttpStatus.ACCEPTED, response.getStatusCode());
 
         ArgumentCaptor<String> messageCaptor = ArgumentCaptor.forClass(String.class);
         verify(mockJmsTemplate).convertAndSend(eq(mockVoetballerQueue), messageCaptor.capture());
@@ -166,7 +169,7 @@ class VoetballerControllerTest {
 
         var response = controller.sendVoetballer(404L);
 
-        assertEquals(404, response.getStatusCodeValue());
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         verifyNoInteractions(mockJmsTemplate);
     }
 }
